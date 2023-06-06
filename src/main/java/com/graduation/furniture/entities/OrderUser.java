@@ -23,8 +23,7 @@ public class OrderUser {
     @JoinColumn(name = "user_name")
     private Users user;
 
-    @OneToMany(mappedBy = "orderUser")
-    private Set<OrderItem> orderItems;
+    private boolean paymentStatus;
 
     @Column(columnDefinition = "varchar(255)")
     private String receivingAddress;
@@ -38,6 +37,9 @@ public class OrderUser {
     @ManyToOne
     @JoinColumn(name = "status_id")
     private  StatusOrder statusOrder;
+
+    @OneToMany(mappedBy = "orderUser")
+    private Set<OrderItem> orderItems;
 
     private Integer totalOrder;
 

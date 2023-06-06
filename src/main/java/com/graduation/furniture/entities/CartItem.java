@@ -10,7 +10,6 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @Entity
-@JsonIgnoreProperties({"product"})
 @Data
 @NoArgsConstructor
 public class CartItem {

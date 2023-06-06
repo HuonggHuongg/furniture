@@ -25,7 +25,7 @@ public class UserDTO implements Validator {
 
     private  String avatar;
 
-    private String password;
+    private String address;
 
     private String email;
 
@@ -54,15 +54,9 @@ public class UserDTO implements Validator {
     public void validate(Object target, Errors errors) {
         UserDTO registerUserDTO = (UserDTO) target;
 
-        if ("".equals(registerUserDTO.userName)){
-            errors.rejectValue("userName", "", "Username is required!!");
-        }else if (!registerUserDTO.userName.matches("^[a-zA-Z0-9\\S]{2,30}$")) {
-            errors.rejectValue("userName", "", "Username must from 2 to 30 character and no spaces!!");
-        }
-
         if ("".equals(registerUserDTO.firstName)){
             errors.rejectValue("firstName", "", "FirstName is required!!");
-        }else if(registerUserDTO.userName.length() > 255) {
+        }else if(registerUserDTO.firstName.length() > 255) {
             errors.rejectValue("firstName", "", "FirstName must less than 255 character!!");
         }
 
@@ -74,7 +68,7 @@ public class UserDTO implements Validator {
 
         if ("".equals(registerUserDTO.email)){
             errors.rejectValue("email", "", "Email is required!!");
-        }else if(!registerUserDTO.email.matches("^[a-zA-Z0-9]{2,32}@[a-z]{2,12}\\.[a-z]{2,12}$")) {
+        }else if(!registerUserDTO.email.matches("^[a-zA-Z0-9.]{2,32}@[a-z]{2,12}\\.[a-z]{2,12}$")) {
             errors.rejectValue("email", "", "Email is invalid!!");
         }
 

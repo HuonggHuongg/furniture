@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -41,5 +42,10 @@ public class OrderItemServiceImpl implements OrderItemService {
     @Override
     public Page<OrderItem> findAll(int pageNum, int size) {
         return null;
+    }
+
+    @Override
+    public List<OrderItem> findOrderItemByOrderUserOrderId(Integer orderId) {
+        return orderItemRepo.findOrderItemByOrderUser_OrderId(orderId);
     }
 }

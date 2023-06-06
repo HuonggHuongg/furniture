@@ -2,8 +2,11 @@ package com.graduation.furniture.entities;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import javax.persistence.*;
+
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDate;
@@ -15,6 +18,7 @@ import java.util.Set;
 @JsonIgnoreProperties({"userRoles", "feedbacks", "cart", "orderUsers"})
 @Data
 @NoArgsConstructor
+@SuperBuilder
 public class Users {
     @Id
     @Column(columnDefinition = "varchar(255)")
@@ -36,7 +40,12 @@ public class Users {
     private String email;
 
     @Column(columnDefinition = "varchar(255)")
+    private String address;
+
+    @Column(columnDefinition = "varchar(255)")
     private String phoneNumber;
+
+    private String resetPassToken;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private LocalDate createdAt;

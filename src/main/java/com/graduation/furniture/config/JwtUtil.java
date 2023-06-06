@@ -15,7 +15,7 @@ import java.util.Map;
 @Component
 public class JwtUtil {
     private static final String SECRET_KEY = "huong0909";
-    private static final Integer JWT_EXPIRED_MS = 600000;
+    private static final Integer JWT_EXPIRED_MS = 3600*24*1000;
 
 
     public String generateToken(Authentication authentication) {

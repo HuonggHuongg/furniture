@@ -2,10 +2,7 @@ package com.graduation.furniture.controller;
 
 import com.graduation.furniture.dto.FeedbackDTO;
 import com.graduation.furniture.dto.ProductDTO;
-import com.graduation.furniture.entities.Category;
-import com.graduation.furniture.entities.Feedback;
-import com.graduation.furniture.entities.Product;
-import com.graduation.furniture.entities.Users;
+import com.graduation.furniture.entities.*;
 import com.graduation.furniture.service.CategoryService;
 import com.graduation.furniture.service.FeedbackService;
 import com.graduation.furniture.service.ProductService;
@@ -57,17 +54,18 @@ public class ProductController {
         }
     }
 
-//    @GetMapping("")
-//    public ResponseEntity<List<Product>> findAll() {
-//        List<Product> productPage = productService.findAll();
-//        if (productPage.isEmpty()) {
-//            return ResponseEntity.noContent().build();
-//        } else {
-//            return ResponseEntity.ok(productPage);
-//        }
-//    }
+    @GetMapping("findAll")
+    public ResponseEntity<List<Product>> findAllProduct() {
+        List<Product> productPage = productService.findAll();
+        if (productPage.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        } else {
+            return ResponseEntity.ok(productPage);
+        }
+    }
 
     @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<?> add(@RequestBody ProductDTO productDTO, BindingResult bindingResult) {
         new ProductDTO().validate(productDTO, bindingResult);
         Category category = categoryService.findById(productDTO.getCategory().getCategoryId()).orElse(null);
@@ -84,6 +82,7 @@ public class ProductController {
     }
 
     @PatchMapping(value = "/{id}")
+    @Secured("ROLE_ADMIN")
     public ResponseEntity<?> update(@PathVariable String id, @RequestBody ProductDTO productDTO, BindingResult bindingResult) {
         Integer idUpdate = null;
         try {
@@ -107,6 +106,7 @@ public class ProductController {
         }
         Product product = new Product();
         productDTO.setProductId(productUpdate.getProductId());
+        productDTO.setCreatedAt(productUpdate.getCreatedAt());
         BeanUtils.copyProperties(productDTO, product);
         Product newCategory = productService.update(product);
         return ResponseEntity.ok(newCategory);
@@ -180,4 +180,21 @@ public class ProductController {
         Feedback newFeedback = feedbackService.save(feedback);
         return new ResponseEntity<>(newFeedback, HttpStatus.OK);
     }
+
+//    @PatchMapping(value = "/changeInventory")
+//    public ResponseEntity<?> changeInventory(id) {
+//        Integer productId = null;
+//        try {
+//            productId = Integer.parseInt(id);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//            return ResponseEntity.notFound().build();
+//        }
+//        Product product = productService.findById(productId).orElse(null);
+//        if (product == null){
+//            return ResponseEntity.notFound().build();
+//        }
+//        Product productUpdate = productService.changeInventory(productId);
+//        return ResponseEntity.ok(productUpdate);
+//    }
 }

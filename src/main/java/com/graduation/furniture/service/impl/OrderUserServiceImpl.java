@@ -1,9 +1,6 @@
 package com.graduation.furniture.service.impl;
 
-import com.graduation.furniture.entities.CartItem;
-import com.graduation.furniture.entities.OrderItem;
-import com.graduation.furniture.entities.OrderUser;
-import com.graduation.furniture.entities.StatusOrder;
+import com.graduation.furniture.entities.*;
 import com.graduation.furniture.repository.OrderItemRepo;
 import com.graduation.furniture.repository.OrderUserRepo;
 import com.graduation.furniture.repository.StatusOrderRepo;
@@ -62,8 +59,20 @@ public class OrderUserServiceImpl implements OrderUserService {
     }
 
     @Override
-    public void deleteById(Integer id) {
+    public OrderUser changePaymentStatus(Integer id) {
+        LocalDateTime updatedAt = LocalDateTime.now();
+        OrderUser orderUser = orderUserRepo.findById(id).orElse(null);
+        if (orderUser != null) {
+//            orderUser.setCreatedAt(orderUser.getCreatedAt());
+            orderUser.setPaymentStatus(true);
+            orderUser.setUpdatedAt(updatedAt);
+            orderUserRepo.save(orderUser);
+        }
+        return orderUser;
+    }
 
+    @Override
+    public void deleteById(Integer id) {
     }
 
     @Override
@@ -75,5 +84,20 @@ public class OrderUserServiceImpl implements OrderUserService {
     public Page<OrderUser> findAll(int pageNum, int size) {
         Pageable pageable = PageRequest.of(pageNum-1, size);
         return orderUserRepo.findAll(pageable);
+    }
+
+    @Override
+    public List<OrderUser> findOrderUserByStatusPending() {
+        return orderUserRepo.findOrderUserByStatusOrder_StatusId(1);
+    }
+
+    @Override
+    public List<OrderUser> findOrderUserByStatusDelivered() {
+        return orderUserRepo.findOrderUserByStatusOrder_StatusId(2);
+    }
+
+    @Override
+    public List<OrderUser> findOrderUserByUserUserName(String userName) {
+        return orderUserRepo.findOrderUserByUserUserName(userName);
     }
 }

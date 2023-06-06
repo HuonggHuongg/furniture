@@ -13,6 +13,7 @@ import java.util.Set;
 @Entity
 @Data
 @NoArgsConstructor
+
 @JsonIgnoreProperties({"feedbacks", "cartItems" , "orderItems"})
 public class Product {
     @Id

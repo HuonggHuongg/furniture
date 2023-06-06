@@ -54,6 +54,11 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
+    public Users findByEmail(String email) {
+        return userRepo.findUsersByEmail(email);
+    }
+
+    @Override
     public Users save(Users user) {
         LocalDate now = LocalDate.now();
         user.setCreatedAt(now);

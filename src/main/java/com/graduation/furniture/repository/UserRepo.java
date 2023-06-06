@@ -8,4 +8,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface UserRepo extends JpaRepository<Users, String> {
 
     Page<Users> findAllByDeleted(boolean deleted, Pageable pageable);
+
+    Users findUsersByEmail(String email);
 }

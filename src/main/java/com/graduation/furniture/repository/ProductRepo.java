@@ -11,10 +11,10 @@ import org.springframework.data.repository.query.Param;
 public interface ProductRepo extends JpaRepository<Product, Integer> {
 
     @Query("select p from Product p where p.productName like %:productName% " +
-            "AND p.category.categoryId = :categoryId " +
+            "AND p.category.categoryName = :categoryName " +
             "AND p.deleted = :deleted ")
     Page<Product> getAllProductAndFilter(@Param("productName") String productName,
-                                         @Param("categoryId") String categoryId,
+                                         @Param("categoryName") String categoryName,
                                          @Param("deleted") boolean deleted, Pageable pageable);
 
     @Query("select p from Product p where p.productName like %:productName% AND p.deleted = :deleted ")

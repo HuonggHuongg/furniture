@@ -19,4 +19,6 @@ public interface ProductService {
     Page<Product> findAll(int pageNum, int size,String search,String filter,String order, String dir);
 
     List<Product> findAll();
+
+//    Product changeInventory(Integer productId);
 }

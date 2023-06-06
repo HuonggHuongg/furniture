@@ -18,4 +18,6 @@ public interface UserService {
     Page<Users> findAll(int pageNum, int size);
 
     Users registerUser(RegisterUserDTO registerUserDTO);
+
+    Users findByEmail(String email);
 }

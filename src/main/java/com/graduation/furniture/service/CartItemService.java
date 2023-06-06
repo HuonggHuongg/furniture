@@ -22,5 +22,7 @@ public interface CartItemService {
     List<CartItem> findByUserName(String userName);
 
     void deleteByProductId(Integer productId);
-    Page<CartItem> findAll(int pageNum, int size);
+    List<CartItem> findAll();
+
+    void deleteById(Integer cartItemId);
 }

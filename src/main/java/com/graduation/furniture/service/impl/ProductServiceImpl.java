@@ -77,4 +77,11 @@ public class ProductServiceImpl implements ProductService {
     public List<Product> findAll() {
         return productRepo.findAll();
     }
+
+//    @Override
+//    public Product changeInventory(Integer productId) {
+//        Product product = productRepo.findById(productId).orElse(null);
+//
+//
+//    }
 }

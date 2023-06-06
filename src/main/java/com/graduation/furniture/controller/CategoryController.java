@@ -17,7 +17,6 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/category")
-@Secured("ROLE_USER")
 public class CategoryController {
 
     @Autowired

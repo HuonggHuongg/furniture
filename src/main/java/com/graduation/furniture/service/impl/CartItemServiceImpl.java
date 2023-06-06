@@ -63,12 +63,16 @@ public class CartItemServiceImpl implements CartItemService {
 
     @Override
     public Optional<CartItem> findById(Integer id) {
-        return Optional.empty();
+        return cartItemRepo.findById(id);
     }
 
     @Override
     public List<CartItem> findByUserName(String userName) {
-        return cartItemRepo.findByCart_User_UserName(userName);
+        List<CartItem> cartItems = cartItemRepo.findCartItemByCart_User_UserName(userName);
+        cartItems.forEach(cartItem -> {
+            System.out.println(cartItem.getProduct().getProductId());
+        });
+        return cartItemRepo.findCartItemByCart_User_UserName(userName);
     }
 
     @Override
@@ -77,8 +81,14 @@ public class CartItemServiceImpl implements CartItemService {
     }
 
     @Override
-    public Page<CartItem> findAll(int pageNum, int size) {
-        Pageable pageable = PageRequest.of(pageNum-1, size);
-        return cartItemRepo.findAll(pageable);
+    public List<CartItem> findAll() {
+        return cartItemRepo.findAll();
     }
+
+    @Override
+    public void deleteById(Integer cartItemId) {
+        cartItemRepo.deleteById(cartItemId);
+    }
+
+
 }

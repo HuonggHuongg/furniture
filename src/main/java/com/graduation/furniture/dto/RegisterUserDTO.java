@@ -62,7 +62,7 @@ public class RegisterUserDTO implements Validator {
 
         if ("".equals(registerUserDTO.email)) {
             errors.rejectValue("email", "", "Email is required!!");
-        } else if (!registerUserDTO.email.matches("^[a-zA-Z0-9]{2,32}@[a-z]{2,12}\\.[a-z]{2,12}$")) {
+        } else if (!registerUserDTO.email.matches("^[a-zA-Z0-9.]{2,32}@[a-z]{2,12}\\.[a-z]{2,12}$")) {
             errors.rejectValue("email", "", "Email is invalid!!");
         }
 

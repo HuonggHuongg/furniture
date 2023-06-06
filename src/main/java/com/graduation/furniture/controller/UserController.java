@@ -2,16 +2,15 @@ package com.graduation.furniture.controller;
 
 import com.graduation.furniture.config.JwtResponse;
 import com.graduation.furniture.config.JwtUtil;
-import com.graduation.furniture.dto.LoginDTO;
-import com.graduation.furniture.dto.RegisterUserDTO;
-import com.graduation.furniture.dto.UserDTO;
-import com.graduation.furniture.dto.UserLoginResponse;
+import com.graduation.furniture.dto.*;
 import com.graduation.furniture.entities.Cart;
 import com.graduation.furniture.entities.UserRole;
 import com.graduation.furniture.entities.Users;
 import com.graduation.furniture.service.CartService;
+import com.graduation.furniture.service.EmailService;
 import com.graduation.furniture.service.UserRoleService;
 import com.graduation.furniture.service.UserService;
+import net.bytebuddy.utility.RandomString;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -24,6 +23,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.User;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
@@ -38,16 +38,19 @@ public class UserController {
     private UserService userService;
 
     @Autowired
-    private CartService cartService;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
 
     @Autowired
     private UserRoleService userRoleService;
 
     @Autowired
+    private EmailService emailService;
+
+    @Autowired
     private JwtUtil jwtUtil;
+
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @GetMapping("")
     public ResponseEntity<Page<Users>> findAll(@RequestParam(name = "page", defaultValue = "1") int page, @RequestParam(name = "size", defaultValue = "5") int size) {
@@ -59,10 +62,15 @@ public class UserController {
         }
     }
 
-    @PostMapping(value = "", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "")
     public ResponseEntity<?> register(@RequestBody RegisterUserDTO registerUserDTO, BindingResult bindingResult) {
         new RegisterUserDTO().validate(registerUserDTO, bindingResult);
         userService.findById(registerUserDTO.getUserName()).ifPresent(existUser -> bindingResult.rejectValue("userName", "", "User is exist!!"));
+
+        Users userEmailExist = userService.findByEmail(registerUserDTO.getEmail());
+        if (userEmailExist != null) {
+            bindingResult.rejectValue("email", "", "Email is exist!!");
+        }
         if (bindingResult.hasFieldErrors()) {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
             return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
@@ -93,21 +101,78 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.OK).body(userLoginResponse);
     }
 
-    @PatchMapping(value = "/{username}")
-    public ResponseEntity<?> update(@PathVariable String username, @RequestBody UserDTO userDTO, BindingResult bindingResult) {
+    @PostMapping("/forgot-password")
+    public ResponseEntity<?> forgotPassword(@RequestBody ForgotPassDTO forgotPassDTO, BindingResult bindingResult) throws Exception {
+        Users userEmailExist = userService.findByEmail(forgotPassDTO.getEmail());
+        if (userEmailExist == null) {
+            bindingResult.rejectValue("email", "", "Email is not exist!!");
+        }
+        if (bindingResult.hasFieldErrors()) {
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
+        }
+        if (userEmailExist != null) {
+            String resetPassword = RandomString.make(20);
+            userEmailExist.setResetPassToken(resetPassword);
+            userService.update(userEmailExist);
+            String status = emailService.sendMailForgotPassword(forgotPassDTO.getEmail(), "http://localhost:3000/reset-password?token="
+                    + resetPassword + "&email=" + forgotPassDTO.getEmail());
+            if ("200".equals(status)) {
+                return new ResponseEntity<>("Mail sent Successfully", HttpStatus.OK);
+            }
+            return new ResponseEntity<>("Sent email failed", HttpStatus.BAD_REQUEST);
+        }
+        return new ResponseEntity<>("Your email is not registered", HttpStatus.NOT_FOUND);
+    }
+
+    @PostMapping(value = "/reset-password")
+    public ResponseEntity<?> resetPassword(@RequestBody ResetPasswordDTO resetPasswordDTO, BindingResult bindingResult) {
+        Users userEmailExist = userService.findByEmail(resetPasswordDTO.getEmail());
+        if (userEmailExist == null) {
+            bindingResult.rejectValue("email", "", "Email is not exist!!");
+        } else if (!resetPasswordDTO.getToken().equals(userEmailExist.getResetPassToken())) {
+            bindingResult.rejectValue("token", "", "Your request to change your password is already in use, please send new request");
+        }
+        if (bindingResult.hasFieldErrors()) {
+            List<FieldError> fieldErrors = bindingResult.getFieldErrors();
+            return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
+        }
+
+        assert userEmailExist != null;
+        userEmailExist.setPassword(passwordEncoder.encode(resetPasswordDTO.getResetPassword()));
+        userEmailExist.setResetPassToken(null);
+        Users updateUser = userService.update(userEmailExist);
+        return ResponseEntity.ok(updateUser);
+    }
+
+    @PatchMapping(value = "")
+    public ResponseEntity<?> update(Authentication currentUser, @RequestBody UserDTO userDTO, BindingResult bindingResult) {
         new UserDTO().validate(userDTO, bindingResult);
-        Users existUser = userService.findById(username).orElse(null);
-        if (existUser == null){
+        Users existUser = userService.findById(currentUser.getName()).orElse(null);
+        if (existUser == null) {
             bindingResult.rejectValue("userName", "", "User is not exist!!");
         }
         if (bindingResult.hasFieldErrors()) {
             List<FieldError> fieldErrors = bindingResult.getFieldErrors();
             return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
         }
-        Users user = new Users();
-        userDTO.setUserName(username);
-        BeanUtils.copyProperties(userDTO, user);
-        Users updateUser = userService.update(user);
+//        Users user = new Users();
+//        userDTO.setUserName(currentUser.getName());
+//        BeanUtils.copyProperties(userDTO, user);
+//        existUser = Users.builder()
+//                .avatar(userDTO.getAvatar())
+//                .firstName(userDTO.getFirstName())
+//                .lastName(userDTO.getLastName())
+//                .address(userDTO.getAddress())
+//                .phoneNumber(userDTO.getPhoneNumber())
+//                .build();
+        existUser.setAvatar(userDTO.getAvatar());
+        existUser.setFirstName(userDTO.getFirstName());
+        existUser.setLastName(userDTO.getLastName());
+        existUser.setPhoneNumber(userDTO.getPhoneNumber());
+        existUser.setAddress(userDTO.getAddress());
+
+        Users updateUser = userService.update(existUser);
         return ResponseEntity.ok(updateUser);
     }
 
