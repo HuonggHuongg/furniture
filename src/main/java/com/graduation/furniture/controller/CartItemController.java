@@ -64,4 +64,53 @@ public class CartItemController {
         cartItemService.deleteById(idDelete);
         return ResponseEntity.ok().build();
     }
+
+    @PatchMapping("addQuantity")
+    public ResponseEntity<?> updateAddQuantityCartItem(@RequestParam String id) {
+        Integer cartItemId = null;
+        try {
+            cartItemId = Integer.parseInt(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        }
+        CartItem cartItem = cartItemService.findById(cartItemId).orElse(null);
+
+        if (cartItem != null) {
+            Integer quantity = cartItem.getQuantity() + 1;
+            cartItem.setQuantity(quantity);
+            cartItemService.save(cartItem);
+        }
+        return ResponseEntity.ok(cartItem);
+    }
+
+    @PatchMapping("subQuantity")
+    public ResponseEntity<?> updateSubQuantityCartItem(@RequestParam String id) {
+        Integer cartItemId = null;
+        try {
+            cartItemId = Integer.parseInt(id);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.notFound().build();
+        }
+        CartItem cartItem = cartItemService.findById(cartItemId).orElse(null);
+        if (cartItem != null) {
+            Integer quantity = cartItem.getQuantity() - 1;
+            cartItem.setQuantity(quantity);
+            cartItemService.save(cartItem);
+        }
+        return ResponseEntity.ok(cartItem);
+    }
+
+    @PatchMapping("")
+    public ResponseEntity<?> updateQuantityCartItem(@RequestBody CartItemDTO cartItemDTO) {
+        CartItem cartItem = cartItemService.findById(cartItemDTO.getCartItemId()).orElse(null);
+        if (cartItem != null) {
+            Integer payment = cartItemDTO.getQuantity() * cartItem.getProduct().getPrice();
+            cartItem.setQuantity(cartItemDTO.getQuantity());
+            cartItem.setPaymentCartItem(payment);
+            cartItemService.save(cartItem);
+        }
+        return ResponseEntity.ok(cartItem);
+    }
 }

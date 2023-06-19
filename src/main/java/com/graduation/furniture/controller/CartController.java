@@ -51,11 +51,9 @@ public class CartController {
         }
     }
 
-    @PostMapping("/{username}/items")
-    public ResponseEntity<?> addProductToCartItem(Authentication currentUser, @PathVariable String username, @RequestBody CartItemDTO cartItemDTO) {
-        if (!username.equals(currentUser.getName())) {
-            return new ResponseEntity<>("You do not have permission to edit this user's shopping cart information", HttpStatus.UNAUTHORIZED);
-        }
+    @PostMapping("/items")
+    public ResponseEntity<?> addProductToCartItem(Authentication currentUser, @RequestBody CartItemDTO cartItemDTO) {
+        String username = currentUser.getName();
         Product product = productService.findById(cartItemDTO.getProductId()).orElse(null);
         if (product != null){
             if(product.getInventoryQuantity() < cartItemDTO.getQuantity()){
@@ -63,6 +61,7 @@ public class CartController {
             }
         }
         Cart cart = cartService.findByUsername(username);
+
         CartItem cartItem = cartItemService.addProductToCartItem(username, cartItemDTO);
         Cart updateCart = cartService.update(cart);
         return ResponseEntity.ok(cartItem);

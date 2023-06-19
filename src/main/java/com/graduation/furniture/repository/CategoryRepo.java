@@ -13,4 +13,6 @@ public interface CategoryRepo extends JpaRepository<Category, Integer> {
     Page<Category> findAllByDeleted(boolean deleted, Pageable pageable);
 
     List<Category> findAllByDeleted(boolean deleted);
+
+    Category findByCategoryName(String categoryName);
 }

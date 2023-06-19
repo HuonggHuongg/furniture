@@ -49,6 +49,10 @@ public class CategoryController {
     @Secured("ROLE_ADMIN")
     public ResponseEntity<?> addCategory(@RequestBody CategoryDTO categoryDTO, BindingResult bindingResult) {
         new CategoryDTO().validate(categoryDTO, bindingResult);
+        Category existCategory = categoryService.findByCategoryName(categoryDTO.getCategoryName());
+        if (existCategory != null) {
+            bindingResult.rejectValue("categoryName", "", "Category name is exist!!");
+        }
         if (bindingResult.hasFieldErrors()) {
             return new ResponseEntity<>(bindingResult.getFieldErrors(), HttpStatus.BAD_REQUEST);
         }
@@ -70,8 +74,11 @@ public class CategoryController {
         }
         new CategoryDTO().validate(categoryDTO, bindingResult);
         Category categoryUpdate = categoryService.findById(categoryId).orElse(null);
+        Category existCategory = categoryService.findByCategoryName(categoryDTO.getCategoryName());
         if (categoryUpdate == null) {
             return ResponseEntity.notFound().build();
+        } else if (existCategory != null && !categoryDTO.getCategoryName().equals(categoryUpdate.getCategoryName())) {
+            bindingResult.rejectValue("categoryName", "", "Category name is exist!!");
         }
 
         if (bindingResult.hasFieldErrors()) {

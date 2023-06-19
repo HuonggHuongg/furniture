@@ -9,6 +9,7 @@ import com.graduation.furniture.repository.CartRepo;
 import com.graduation.furniture.repository.ProductRepo;
 import com.graduation.furniture.repository.UserRepo;
 import com.graduation.furniture.service.CartItemService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -17,8 +18,10 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -40,19 +43,38 @@ public class CartItemServiceImpl implements CartItemService {
     public CartItem addProductToCartItem(String username, CartItemDTO cartItemDTO) {
         Cart cart = cartRepo.findByUser_UserName(username);
         LocalDate now = LocalDate.now();
-        CartItem cartItem = new CartItem();
-        Product product = productRepo.findById(cartItemDTO.getProductId()).orElse(null);
-        Integer payment = cartItemDTO.getQuantity() * product.getPrice();
-        cartItem.setPaymentCartItem(payment);
-        cartItem.setCart(cart);
-        cartItem.setProduct(product);
-        cartItem.setQuantity(cartItemDTO.getQuantity());
-        cartItem.setCreatedAt(now);
-        return cartItemRepo.save(cartItem);
-    }
+        LocalDateTime nowDateTime = LocalDateTime.now();
 
-    @Override
-    public CartItem update(CartItem cartItem) {
+        Product product = productRepo.findById(cartItemDTO.getProductId()).orElse(null);
+        List<CartItem> cartItemList = cartItemRepo.findCartItemByCart_User_UserName(username);
+        List<CartItem> filterList = cartItemList.stream().filter(item -> item.getProduct().getProductId().equals(cartItemDTO.getProductId())).toList();
+        if (!filterList.isEmpty()) {
+            filterList.forEach(item -> {
+                System.err.println("CÓ ");
+                CartItem cartItem = new CartItem();
+                System.err.println(" TRÙNG ");
+                Integer quantityUpdate = cartItemDTO.getQuantity() + item.getQuantity();
+                System.err.println(quantityUpdate);
+                Integer payment = quantityUpdate * product.getPrice();
+                BeanUtils.copyProperties(item, cartItem);
+                cartItem.setPaymentCartItem(payment);
+                cartItem.setQuantity(quantityUpdate);
+                cartItem.setUpdatedAt(nowDateTime);
+                System.err.println(cartItem.getCartItemId());
+                cartItemRepo.save(cartItem);
+            });
+        } else {
+            CartItem cartItem = new CartItem();
+            System.err.println("CHƯA CÓ ");
+            Integer payment = cartItemDTO.getQuantity() * product.getPrice();
+            cartItem.setPaymentCartItem(payment);
+            cartItem.setCart(cart);
+            cartItem.setProduct(product);
+            cartItem.setQuantity(cartItemDTO.getQuantity());
+            cartItem.setCreatedAt(now);
+            System.err.println("SAVE 86");
+            cartItemRepo.save(cartItem);
+        }
         return null;
     }
 
@@ -90,5 +112,9 @@ public class CartItemServiceImpl implements CartItemService {
         cartItemRepo.deleteById(cartItemId);
     }
 
-
+    @Override
+    public CartItem save(CartItem cartItem) {
+        cartItem.setUpdatedAt(LocalDateTime.now());
+        return cartItemRepo.save(cartItem);
+    }
 }

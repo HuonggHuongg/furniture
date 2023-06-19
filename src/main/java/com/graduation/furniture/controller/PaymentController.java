@@ -25,6 +25,8 @@ public class PaymentController {
     @Autowired
     HttpServletResponse resp;
 
+//    public static final Double CONVERT_VND = 23000D;
+
     @GetMapping("/payment")
     public ResponseEntity<?> test(@RequestParam String totalAmount, @RequestParam String orderId) throws UnsupportedEncodingException {
         String vnp_Version = "2.1.0";
@@ -38,20 +40,21 @@ public class PaymentController {
 //        String amountParam = totalAmount;
 
 //        System.out.println(amountParam);
-        int amount = 100000; // Giá trị mặc định nếu không thể chuyển đổi thành số nguyên
+        double amount = 100000; // Giá trị mặc định nếu không thể chuyển đổi thành số nguyên
 
         if (totalAmount != null && !totalAmount.isEmpty()) {
-            amount = Integer.parseInt(totalAmount) * 100;
+            amount = (Double.parseDouble(totalAmount) * 100 * 23000);
         } else {
-            amount = amount * 100;
+            amount =  (amount * 100 );
         }
+        long longValue = (long) (amount );
 
 //        int amount = Integer.parseInt(req.getParameter("amount")) * 100;
         Map<String, String> vnp_Params = new HashMap<>();
         vnp_Params.put("vnp_Version", vnp_Version);
         vnp_Params.put("vnp_Command", vnp_Command);
         vnp_Params.put("vnp_TmnCode", vnp_TmnCode);
-        vnp_Params.put("vnp_Amount", String.valueOf(amount));
+        vnp_Params.put("vnp_Amount", Long.toString(longValue));
         vnp_Params.put("vnp_CurrCode", "VND");
         String bank_code = req.getParameter("bankcode");
         if (bank_code != null && !bank_code.isEmpty()) {

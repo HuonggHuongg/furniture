@@ -43,8 +43,8 @@ public class OrderUser {
 
     private Integer totalOrder;
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
-    private LocalDate createdAt;
+    @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime createdAt;
 
     @DateTimeFormat(pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime updatedAt;

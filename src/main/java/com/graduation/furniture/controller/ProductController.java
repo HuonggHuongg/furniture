@@ -2,14 +2,13 @@ package com.graduation.furniture.controller;
 
 import com.graduation.furniture.dto.FeedbackDTO;
 import com.graduation.furniture.dto.ProductDTO;
+import com.graduation.furniture.dto.TopProductTrendingDto;
 import com.graduation.furniture.entities.*;
-import com.graduation.furniture.service.CategoryService;
-import com.graduation.furniture.service.FeedbackService;
-import com.graduation.furniture.service.ProductService;
-import com.graduation.furniture.service.UserService;
+import com.graduation.furniture.service.*;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,6 +19,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -38,6 +38,9 @@ public class ProductController {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ReportService reportService;
 
     @GetMapping("")
     public ResponseEntity<Page<Product>> findAll(@RequestParam(name = "page", defaultValue = "1") int page,
@@ -140,7 +143,7 @@ public class ProductController {
     }
 
     @GetMapping("/{id}/feedback")
-    public ResponseEntity<List<Feedback>> getFeedback(Authentication currentUser, @PathVariable Integer id) {
+    public ResponseEntity<List<Feedback>> getFeedback(@PathVariable Integer id) {
         Product product = productService.findById(id).orElse(null);
         if (product == null) {
             return ResponseEntity.notFound().build();
@@ -158,11 +161,14 @@ public class ProductController {
             e.printStackTrace();
             return ResponseEntity.notFound().build();
         }
-        if (!feedbackDTO.getUser().getUserName().equals(currentUser.getName())) {
-            return new ResponseEntity<>("You do not have permission to edit this user's shopping cart information", HttpStatus.UNAUTHORIZED);
-        }
+//        if (!feedbackDTO.getUser().getUserName().equals(currentUser.getName())) {
+//            return new ResponseEntity<>("You do not have permission to edit this user's shopping cart information", HttpStatus.UNAUTHORIZED);
+//        }
         new FeedbackDTO().validate(feedbackDTO, bindingResult);
-        Users user = userService.findById(feedbackDTO.getUser().getUserName()).orElse(null);
+
+        Users user = userService.findById(currentUser.getName()).orElse(null);
+
+        System.err.println(user.getUserName());
         Product product = productService.findById(idProductFeedback).orElse(null);
         if (user == null) {
             bindingResult.rejectValue("user", "", "User is not exist!!");
@@ -175,26 +181,20 @@ public class ProductController {
             return new ResponseEntity<>(fieldErrors, HttpStatus.BAD_REQUEST);
         }
         Feedback feedback = new Feedback();
+
         feedbackDTO.setProduct(product);
         BeanUtils.copyProperties(feedbackDTO, feedback);
+        feedback.setUser(user);
+
         Feedback newFeedback = feedbackService.save(feedback);
         return new ResponseEntity<>(newFeedback, HttpStatus.OK);
     }
 
-//    @PatchMapping(value = "/changeInventory")
-//    public ResponseEntity<?> changeInventory(id) {
-//        Integer productId = null;
-//        try {
-//            productId = Integer.parseInt(id);
-//        } catch (Exception e) {
-//            e.printStackTrace();
-//            return ResponseEntity.notFound().build();
-//        }
-//        Product product = productService.findById(productId).orElse(null);
-//        if (product == null){
-//            return ResponseEntity.notFound().build();
-//        }
-//        Product productUpdate = productService.changeInventory(productId);
-//        return ResponseEntity.ok(productUpdate);
-//    }
+    @GetMapping("trending-product")
+    public ResponseEntity<?> trendingProductByPeriodTime(@RequestParam("startDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate startDate,
+                                                         @RequestParam("endDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate endDate) {
+
+        List<TopProductTrendingDto> topProductTrendingDtoList = reportService.trendingProductByPeriod(startDate, endDate);
+        return new ResponseEntity<>(topProductTrendingDtoList, HttpStatus.OK);
+    }
 }

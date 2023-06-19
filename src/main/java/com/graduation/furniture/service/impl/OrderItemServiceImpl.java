@@ -10,6 +10,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,18 +26,8 @@ public class OrderItemServiceImpl implements OrderItemService {
     }
 
     @Override
-    public OrderItem update(OrderItem orderItem) {
-        return null;
-    }
-
-    @Override
-    public void deleteById(Integer id) {
-
-    }
-
-    @Override
     public Optional<OrderItem> findById(Integer id) {
-        return Optional.empty();
+        return orderItemRepo.findById(id);
     }
 
     @Override
@@ -48,4 +39,18 @@ public class OrderItemServiceImpl implements OrderItemService {
     public List<OrderItem> findOrderItemByOrderUserOrderId(Integer orderId) {
         return orderItemRepo.findOrderItemByOrderUser_OrderId(orderId);
     }
+
+    @Override
+    public OrderItem changeFeedbackStatus(Integer orderItemId) {
+        LocalDateTime updatedAt = LocalDateTime.now();
+        OrderItem orderItem = orderItemRepo.findById(orderItemId).orElse(null);
+        if (orderItem != null) {
+            orderItem.setFeedbackStatus(true);
+            orderItem.setUpdatedAt(updatedAt);
+            orderItemRepo.save(orderItem);
+        }
+        return orderItem;
+    }
+
+
 }

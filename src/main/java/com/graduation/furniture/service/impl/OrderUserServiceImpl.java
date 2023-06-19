@@ -32,8 +32,7 @@ public class OrderUserServiceImpl implements OrderUserService {
     @Override
     public OrderUser save(OrderUser orderUser) {
         StatusOrder statusOrder = statusOrderRepo.findById(1).orElse(null);
-        LocalDate now = LocalDate.now();
-        orderUser.setCreatedAt(now);
+        orderUser.setCreatedAt(LocalDateTime.now());
         orderUser.setStatusOrder(statusOrder);
         return orderUserRepo.save(orderUser);
     }

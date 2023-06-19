@@ -13,8 +13,6 @@ import java.util.Optional;
 public interface CartItemService {
     CartItem addProductToCartItem(String username, CartItemDTO cartItemDTO);
 
-    CartItem update(CartItem cartItem);
-
     void deleteByUserName(String userName);
 
     Optional<CartItem> findById(Integer id);
@@ -25,4 +23,6 @@ public interface CartItemService {
     List<CartItem> findAll();
 
     void deleteById(Integer cartItemId);
+
+    CartItem save(CartItem cartItem);
 }

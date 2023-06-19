@@ -1,6 +1,7 @@
 package com.graduation.furniture.controller;
 
 import com.graduation.furniture.dto.EmailDetails;
+import com.graduation.furniture.dto.EmailPaymentSuccess;
 import com.graduation.furniture.service.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -15,13 +16,18 @@ public class EmailController {
     private EmailService emailService;
 
     @PostMapping("/payment-success")
-    public String sendMail(@RequestBody EmailDetails details) {
+    public String sendMail(@RequestBody EmailPaymentSuccess details) {
         return emailService.sendMailPaymentSuccess(details);
     }
 
     @PostMapping("/sign-up-success")
     public String sendMailSignUpSuccess(@RequestBody EmailDetails details) {
         return emailService.sendMailSignUpSuccess(details);
+    }
+
+    @PostMapping("/send-otp")
+    public String sendOTPSignUp(@RequestBody EmailDetails details) {
+        return emailService.sendOTPSignUp(details);
     }
 
 }

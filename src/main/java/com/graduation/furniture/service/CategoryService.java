@@ -17,4 +17,6 @@ public interface CategoryService{
     Page<Category> findAll(int pageNum, int size);
 
     List<Category> findAll();
+
+    Category findByCategoryName(String categoryName);
 }

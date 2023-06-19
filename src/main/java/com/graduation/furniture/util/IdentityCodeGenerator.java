@@ -25,7 +25,6 @@ public class IdentityCodeGenerator implements IdentifierGenerator, Configurable 
                 session.getEntityPersister(obj.getClass().getName(), obj).getIdentifierPropertyName(),
                 obj.getClass().getSimpleName());
 
-
         List<Long> longs = new ArrayList<>();
         longs.add(0L);
         Query query = session.createQuery(queryString);

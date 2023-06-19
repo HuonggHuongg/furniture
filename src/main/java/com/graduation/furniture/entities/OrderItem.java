@@ -28,6 +28,8 @@ public class OrderItem {
 
     private boolean deleted;
 
+    private boolean feedbackStatus;
+
     @ManyToOne
     @JoinColumn(name = "order_id")
     private OrderUser orderUser;

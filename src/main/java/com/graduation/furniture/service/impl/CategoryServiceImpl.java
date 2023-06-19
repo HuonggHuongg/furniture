@@ -54,4 +54,9 @@ public class CategoryServiceImpl implements CategoryService {
     public List<Category> findAll() {
         return categoryRepo.findAllByDeleted(DELETED_FALSE);
     }
+
+    @Override
+    public Category findByCategoryName(String categoryName) {
+        return categoryRepo.findByCategoryName(categoryName);
+    }
 }
