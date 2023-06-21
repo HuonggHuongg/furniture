@@ -20,5 +20,5 @@ public interface ProductService {
 
     List<Product> findAll();
 
-//    Product changeInventory(Integer productId);
+    List<Product> findProductByCategoryId(Integer categoryId);
 }

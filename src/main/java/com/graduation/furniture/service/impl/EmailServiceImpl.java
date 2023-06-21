@@ -351,7 +351,7 @@ public class EmailServiceImpl implements EmailService {
                     "<p style='color: #555;'>Thank you for signing up.</p>" +
                     "<p style='color: #555;'>Otp code to confirm your account is:</p>" +
                     "<ul style='color: #555;'>" +
-                    "<li>OTP: " + details.getMsgBody() + "</li>" +
+                    "<li>OTP: <strong style='color: #314999;'>" + details.getMsgBody() + "</strong></li>" +
                     "</ul>" +
                     "<p style='color: #555;'>If you have any questions, feel free to contact us.</p>" +
                     "<p style='color: #555;'>Best regards,</p>" +

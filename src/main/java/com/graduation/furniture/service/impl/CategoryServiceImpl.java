@@ -1,6 +1,7 @@
 package com.graduation.furniture.service.impl;
 
 import com.graduation.furniture.entities.Category;
+import com.graduation.furniture.entities.Product;
 import com.graduation.furniture.repository.CategoryRepo;
 import com.graduation.furniture.service.CategoryService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -59,4 +60,5 @@ public class CategoryServiceImpl implements CategoryService {
     public Category findByCategoryName(String categoryName) {
         return categoryRepo.findByCategoryName(categoryName);
     }
+
 }

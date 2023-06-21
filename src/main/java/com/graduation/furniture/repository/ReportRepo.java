@@ -10,7 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 
 public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
-    @Query(value = "SELECT calendar.date AS time, COALESCE(SUM(CASE WHEN (ou.status_id = 2 OR ou.status_id IS NULL) THEN COALESCE(ou.total_order, 0) ELSE 0 END), 0) AS revenue " +
+    @Query(value = "SELECT calendar.date AS time, COALESCE(SUM(CASE WHEN (ou.payment_status = true OR ou.payment_status IS NULL) THEN COALESCE(ou.total_order, 0) ELSE 0 END), 0) AS revenue " +
             "            FROM ( " +
             "               SELECT DATE(:startDate) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date " +
             "               FROM ( " +
@@ -24,12 +24,12 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
             "               ) AS c " +
             "               WHERE DATE(:startDate) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY <= :endDate " +
             "                ) AS calendar " +
-            "               LEFT JOIN order_user ou ON DATE(ou.updated_at) = calendar.date " +
+            "               LEFT JOIN order_user ou ON DATE(ou.created_at) = calendar.date " +
             "            GROUP BY calendar.date " +
             "            ORDER BY calendar.date", nativeQuery = true)
     List<RevenueDto> revenueByPeriodTime(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
-    @Query(value = "SELECT calendar.date AS time,COALESCE(SUM(CASE WHEN (ou.status_id = 2) THEN 1 ELSE 0 END), 0) AS totalOrders\n" +
+    @Query(value = "SELECT calendar.date AS time,COALESCE(SUM(CASE WHEN (ou.payment_status = true) THEN 1 ELSE 0 END), 0) AS totalOrders\n" +
             "FROM (\n" +
             "         SELECT DATE(:startDate) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY AS date\n" +
             "         FROM (\n" +
@@ -43,7 +43,7 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
             "         ) AS c\n" +
             "         WHERE DATE(:startDate) + INTERVAL (a.a + (10 * b.a) + (100 * c.a)) DAY <= :endDate\n" +
             "     ) AS calendar\n" +
-            "         LEFT JOIN order_user ou ON DATE(ou.updated_at) = calendar.date\n" +
+            "         LEFT JOIN order_user ou ON DATE(ou.created_at) = calendar.date\n" +
             "GROUP BY calendar.date\n" +
             "ORDER BY calendar.date;", nativeQuery = true)
     List<OrderDto> totalOrderByPeriodTime(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
@@ -52,16 +52,16 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
     @Query(value = "select COALESCE(sum(oi.payment_order_item),0) from product p\n" +
             "join order_item oi on p.product_id = oi.product_id\n" +
             "join order_user ou on ou.order_id = oi.order_id\n" +
-            "where ou.status_id = 2 and (date(ou.updated_at) between :startDate and :endDate);", nativeQuery = true)
+            "where ou.payment_status = true and (date(ou.created_at) between :startDate and :endDate);", nativeQuery = true)
     String totalRevenueByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query(value = "select COALESCE(count(ou.order_id),0) from order_user ou\n" +
-            "where ou.status_id = 2 and  (date(ou.updated_at) between :startDate and :endDate);", nativeQuery = true)
+            "where ou.payment_status = true and  (date(ou.created_at) between :startDate and :endDate);", nativeQuery = true)
     String totalOrderByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query(value = "SELECT COALESCE(COUNT(DISTINCT ou.user_name),0) AS count_records\n" +
             "FROM order_user ou\n" +
-            "WHERE ou.status_id = 2 AND (DATE(ou.updated_at) BETWEEN :startDate AND :endDate);", nativeQuery = true)
+            "WHERE ou.payment_status = true AND (DATE(ou.created_at) BETWEEN :startDate AND :endDate);", nativeQuery = true)
     String totalCustomerByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query(value = "SELECT COALESCE(COUNT(DISTINCT u.user_name),0) FROM users u\n" +
@@ -74,7 +74,7 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
             "     JOIN product p on c.category_id = p.category_id\n" +
             "     JOIN order_item oi on p.product_id = oi.product_id\n" +
             "     JOIN order_user ou on oi.order_id = ou.order_id\n" +
-            "where ou.status_id = 2 and (DATE(ou.updated_at) BETWEEN :startDate AND :endDate)\n" +
+            "where ou.payment_status = true and (DATE(ou.created_at) BETWEEN :startDate AND :endDate)\n" +
             "GROUP BY c.category_id\n" +
             "ORDER BY revenue DESC\n" +
             "LIMIT 6", nativeQuery = true)
@@ -87,7 +87,7 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
             "            JOIN order_item oi on p.product_id = oi.product_id  \n" +
             "            JOIN order_user ou on oi.order_id = ou.order_id\n" +
             "            JOIN category c on p.category_id = c.category_id\n" +
-            "            where ou.status_id = 2 and (DATE(ou.updated_at) BETWEEN :startDate AND :endDate)  \n" +
+            "            where ou.payment_status = true and (DATE(ou.created_at) BETWEEN :startDate AND :endDate)  \n" +
             "            GROUP BY p.product_id  \n" +
             "            ORDER BY revenue DESC", nativeQuery = true)
     List<TopProductReportDto> topProductByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
@@ -99,7 +99,7 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
             "                   JOIN order_item oi on p.product_id = oi.product_id   \n" +
             "                   JOIN order_user ou on oi.order_id = ou.order_id \n" +
             "                   JOIN category c on p.category_id = c.category_id \n" +
-            "                   where ou.status_id = 2 and (DATE(ou.updated_at) BETWEEN :startDate AND :endDate)   \n" +
+            "                   where ou.payment_status = true and (DATE(ou.created_at) BETWEEN :startDate AND :endDate)   \n" +
             "                   GROUP BY p.product_id   \n" +
             "                   ORDER BY soldQuantity DESC", nativeQuery = true)
     List<TopProductTrendingDto> trendingProductByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
@@ -107,21 +107,21 @@ public interface ReportRepo extends JpaRepository<OrderUser, Integer> {
     @Query(value = "SELECT u.user_name as username, u.first_name as firstName, u.last_name as lastName , u.avatar as avatar,\n" +
             "       count(ou.order_id) as orders ,sum(ou.total_order) as spending FROM users u\n" +
             "JOIN order_user ou on u.user_name = ou.user_name\n" +
-            "where ou.status_id = 2 and (DATE(ou.updated_at) BETWEEN :startDate AND :endDate)\n" +
+            "where ou.payment_status = true and (DATE(ou.created_at) BETWEEN :startDate AND :endDate)\n" +
             "GROUP BY u.user_name\n" +
             "ORDER BY spending desc;", nativeQuery = true)
     List<TopUserReportDto> topUserByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);
 
     @Query(value = "select oi.order_id as orderId, u.user_name as username, avatar , u.first_name as firstName, u.last_name as lastName,\n" +
             "       oi.product_id as productId, p.product_name as productName, oi.payment_order_item as amount,\n" +
-            "       ou.status_id as statusId, oi.feedback_status as feedbackStatus, f.rating as rating, p.price as price,\n" +
+            "       ou.payment_status as statusId, oi.feedback_status as feedbackStatus, f.rating as rating, p.price as price,\n" +
             "       oi.quantity as quantity\n" +
             "from order_user ou\n" +
             "         JOIN order_item oi on ou.order_id = oi.order_id\n" +
             "         JOIN product p on oi.product_id = p.product_id\n" +
             "         JOIN users u on ou.user_name = u.user_name\n" +
-            "         JOIN feedback f on p.product_id = f.product_id\n" +
-            "where (DATE(ou.updated_at) BETWEEN :startDate AND :endDate)\n" +
+            "         LEFT JOIN feedback f on p.product_id = f.product_id and f.user_name = ou.user_name\n" +
+            "where (DATE(ou.created_at) BETWEEN :startDate AND :endDate)\n" +
             "group by ou.order_id, p.product_id, ou.created_at\n" +
             "order by ou.created_at desc;", nativeQuery = true)
     List<OrderRecentReportDto> orderRecentByPeriod(@Param("startDate") LocalDate startDate, @Param("endDate") LocalDate endDate);

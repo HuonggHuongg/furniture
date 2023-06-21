@@ -54,18 +54,6 @@ public class UserDTO implements Validator {
     public void validate(Object target, Errors errors) {
         UserDTO registerUserDTO = (UserDTO) target;
 
-        if ("".equals(registerUserDTO.firstName)){
-            errors.rejectValue("firstName", "", "FirstName is required!!");
-        }else if(registerUserDTO.firstName.length() > 255) {
-            errors.rejectValue("firstName", "", "FirstName must less than 255 character!!");
-        }
-
-        if ("".equals(registerUserDTO.lastName)){
-            errors.rejectValue("lastName", "", "LastName is required!!");
-        }else if(registerUserDTO.lastName.length() > 255) {
-            errors.rejectValue("lastName", "", "LastName must less than 255 character!!");
-        }
-
         if ("".equals(registerUserDTO.email)){
             errors.rejectValue("email", "", "Email is required!!");
         }else if(!registerUserDTO.email.matches("^[a-zA-Z0-9.]{2,32}@[a-z]{2,12}\\.[a-z]{2,12}$")) {

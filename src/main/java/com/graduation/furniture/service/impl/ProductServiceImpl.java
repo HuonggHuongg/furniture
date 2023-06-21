@@ -28,8 +28,7 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public Product save(Product product) {
-        LocalDate now = LocalDate.now();
-        product.setCreatedAt(now);
+        product.setCreatedAt(LocalDateTime.now());
         return productRepo.save(product);
     }
 
@@ -43,7 +42,7 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public void deleteById(Integer productId) {
         Product product = productRepo.findById(productId).orElse(null);
-        if (product != null){
+        if (product != null) {
             product.setDeleted(true);
             productRepo.save(product);
         }
@@ -67,10 +66,10 @@ public class ProductServiceImpl implements ProductService {
                 pageable = PageRequest.of(pageNum - 1, size, Sort.by(order).descending());
             }
         }
-        if ("".equals(filter)){
-            return productRepo.getAllProduct(search,DELETED_FALSE, pageable);
+        if ("".equals(filter)) {
+            return productRepo.getAllProduct(search, DELETED_FALSE, pageable);
         }
-        return productRepo.getAllProductAndFilter(search, filter,DELETED_FALSE, pageable);
+        return productRepo.getAllProductAndFilter(search, filter, DELETED_FALSE, pageable);
     }
 
     @Override
@@ -78,10 +77,8 @@ public class ProductServiceImpl implements ProductService {
         return productRepo.findAll();
     }
 
-//    @Override
-//    public Product changeInventory(Integer productId) {
-//        Product product = productRepo.findById(productId).orElse(null);
-//
-//
-//    }
+    @Override
+    public List<Product> findProductByCategoryId(Integer categoryId) {
+        return productRepo.findAllByCategory_CategoryId(categoryId);
+    }
 }

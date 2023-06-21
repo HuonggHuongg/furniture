@@ -197,4 +197,17 @@ public class ProductController {
         List<TopProductTrendingDto> topProductTrendingDtoList = reportService.trendingProductByPeriod(startDate, endDate);
         return new ResponseEntity<>(topProductTrendingDtoList, HttpStatus.OK);
     }
+    @GetMapping("/category/{id}")
+    public ResponseEntity<?> getProductByCategory(@PathVariable Integer id) {
+        Category category = categoryService.findById(id).orElse(null);
+        if(category ==  null){
+            return ResponseEntity.noContent().build();
+        }
+
+        List<Product> products = productService.findProductByCategoryId(id);
+        if(products.isEmpty()){
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(products);
+    }
 }

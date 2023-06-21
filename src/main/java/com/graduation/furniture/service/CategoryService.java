@@ -1,6 +1,7 @@
 package com.graduation.furniture.service;
 
 import com.graduation.furniture.entities.Category;
+import com.graduation.furniture.entities.Product;
 import org.springframework.data.domain.Page;
 
 import java.util.List;
@@ -19,4 +20,5 @@ public interface CategoryService{
     List<Category> findAll();
 
     Category findByCategoryName(String categoryName);
+
 }

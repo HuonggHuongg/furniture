@@ -27,7 +27,7 @@ public class ProductDTO implements Validator {
 
     private Integer inventoryQuantity;
 
-    private LocalDate createdAt;
+    private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
 
